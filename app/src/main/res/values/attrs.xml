@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="lineWave">
+        <!--  组件的背景颜色 -->
+        <attr name="bgColor" format="color" />
+        <!-- 波浪线的宽度 -->
+        <attr name="lineWidth" format="integer" />
+        <!-- 波浪线偏移的程度 -->
+        <attr name="lineOffset" format="float" />
+        <!-- 波浪线移动的速度 -->
+        <attr name="lineSpeed" format="float" />
+        <!-- 波浪线初始化振幅 -->
+        <attr name="lineShake" format="float" />
+        <!-- 波浪线上模拟的点数 -->
+        <attr name="pointSize" format="integer" />
+        <!-- 波浪线振动的敏感度 -->
+        <attr name="sensitivity" format="integer" />
+    </declare-styleable>
+
+</resources>

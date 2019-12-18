@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- 波浪线的颜色 0x728eff, 0x6fd3ea, 0x5996ff, 0x3a68e6, 0x5fa4ff, 0x559df7 -->
+    <color name="lineColor1">#FF728EFF</color>
+    <color name="lineColor2">#FF6FD3EA</color>
+    <color name="lineColor3">#FF5996FF</color>
+    <color name="lineColor4">#FF3A68E6</color>
+    <color name="lineColor5">#FF5FA4FF</color>
+    <color name="lineColor6">#FF559DF7</color>
+
+</resources>
