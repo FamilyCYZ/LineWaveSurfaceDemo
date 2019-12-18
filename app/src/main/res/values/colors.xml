@@ -6,6 +6,7 @@
 
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
+    <color name="red">#FFFF0000</color>
     <color name="transparent">#00000000</color>
 
     <!-- 波浪线的颜色 0x728eff, 0x6fd3ea, 0x5996ff, 0x3a68e6, 0x5fa4ff, 0x559df7 -->
