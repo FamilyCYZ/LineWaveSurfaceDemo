@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Shader;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -17,15 +18,18 @@ public class LineWaveView extends LineSurfaceView  {
     private static final String TAG = "LineWaveView";
 
     // 绘图的画笔
-    private Paint mLinePaint = new Paint();
+    private Paint mLinePaint;
     // 声音的分贝数
     private float mVoiceVolume = 1;
+    // 控件的参数
+    private int width;
+    private int height;
+    private int heightCenter;
     // 波浪线上点的集合
     private List<LinePoint> mLinePoints = new ArrayList<>();
     // 波浪线的颜色
     private int[] lineColors;
-    private int width;
-    private int height;
+    private float[] colorPositions;
 
     // 波浪线自定义的参数
     private int mBgColor;       // 画布的背景色
@@ -54,20 +58,12 @@ public class LineWaveView extends LineSurfaceView  {
             mBgColor = typedArray.getColor(R.styleable.LineWaveView_bgColor, getResources().getColor(R.color.white));
             mLineWidth = typedArray.getInt(R.styleable.LineWaveView_lineWidth, 8);
             mLineOffset = typedArray.getFloat(R.styleable.LineWaveView_lineOffset, 10f);
-            mLineSpeed = typedArray.getFloat(R.styleable.LineWaveView_lineSpeed, 4f);
+            mLineSpeed = typedArray.getFloat(R.styleable.LineWaveView_lineSpeed, 7f);
             mLineShake = typedArray.getFloat(R.styleable.LineWaveView_lineShake, 3f);
             mPointSize = typedArray.getInt(R.styleable.LineWaveView_pointSize, 200);
             mSensitivity = typedArray.getInt(R.styleable.LineWaveView_sensitivity, 5);
             typedArray.recycle();
         }
-
-        // 波浪线的颜色
-        lineColors = DataUtils.lineColors;
-
-        mLinePaint = new Paint();
-        mLinePaint.setStrokeWidth(mLineWidth);
-        mLinePaint.setStyle(Paint.Style.STROKE);
-        mLinePaint.setAntiAlias(true);
     }
 
     @Override
@@ -85,8 +81,21 @@ public class LineWaveView extends LineSurfaceView  {
         // 屏幕参数
         width = getMeasuredWidth();
         height = getMeasuredHeight();
+        heightCenter = height / 2;
 
         mLinePoints.clear();
+        // 波浪线的颜色
+        lineColors = DataUtils.lineColors;
+        colorPositions = DataUtils.colorPositions;
+
+        mLinePaint = new Paint();
+        mLinePaint.setStrokeWidth(mLineWidth);
+        mLinePaint.setStyle(Paint.Style.STROKE);
+        mLinePaint.setAntiAlias(true);
+        // 设置波浪线为渐变色
+        LinearGradient linearGradient = new LinearGradient(0, heightCenter, width, heightCenter, lineColors, colorPositions, Shader.TileMode.CLAMP);
+        mLinePaint.setShader(linearGradient);
+
         // 根据时间偏移
         mLineOffset = millisPassed / 1000f * mLineSpeed;
         // 波浪线上每个点（pointSize）之间X轴的间距
@@ -100,17 +109,17 @@ public class LineWaveView extends LineSurfaceView  {
      *
      * @param offset：x轴偏移量
      * @param dx：每个点之间x轴的间距
-     * @param shakeRatio：震动幅度
+     * @param lineShake：震动幅度
      * @param points：所有的点
      */
-    private void initPositions(float offset, float dx, float shakeRatio, List<LinePoint> points) {
+    private void initPositions(float offset, float dx, float lineShake, List<LinePoint> points) {
         for (int i = 0; i < mPointSize; i++) {
             // 每个点的x坐标
             float x = dx * i;
-            // 计算振幅参数：收敛函数，范围0~1 ：-（（2x-y）/y）^2 + 1
-            float shakeParam =  (float)-Math.pow(((2 * i - mPointSize) / mPointSize), 2) + 1;
+            // 计算振幅参数：收敛函数，范围0~1 ：-（（2x-y）/y）^2 + 1 （这个公式会造成波浪轨迹断裂）
+            float shakeParam =  (float)-Math.pow(((2 * i - mPointSize) / mPointSize), 2) + 1f;
             // 获得Y轴坐标
-            float y = getLineY(x, offset, shakeParam, shakeRatio);
+            float y = getLineY(x, offset, shakeParam, lineShake);
             // 存储计算出的每个点
             points.add(new LinePoint(x, y));
         }
@@ -128,14 +137,6 @@ public class LineWaveView extends LineSurfaceView  {
             LinePoint lastPoint = mLinePoints.get(i - 1);
             LinePoint nextPoint = mLinePoints.get(i);
             Log.i(TAG, "drawLine: LastPoint = " + lastPoint + ", NextPoint = " + nextPoint);
-
-            // 将颜色分为等距离的几段，取该段位置的颜色，（%colorIndexMax）放在后面就没有渐变的效果了
-            int lastColor = lineColors[i % colorIndexMax / (mPointSize / colorIndexMax)];
-            int nextColor = lineColors[i % colorIndexMax / (mPointSize / colorIndexMax) + 1];
-            Log.i(TAG, "drawLine: LastColor = " + lastColor + ", NextColor = " + nextColor);
-            // 设置波浪线为渐变色
-            LinearGradient linearGradient = new LinearGradient(0, height / 2, width, height / 2, lastColor, nextColor, Shader.TileMode.CLAMP);
-            mLinePaint.setShader(linearGradient);
 
             canvas.drawLine(lastPoint.x, lastPoint.y, nextPoint.x, nextPoint.y, mLinePaint);
 
@@ -181,6 +182,7 @@ public class LineWaveView extends LineSurfaceView  {
         }
 
         @Override
+        @NonNull
         public String toString() {
             return "LinePoint{" + "x=" + x + ", y=" + y + '}';
         }
