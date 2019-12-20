@@ -1,4 +1,4 @@
-package com.cyz.demo.paint.linewave;
+package com.cyz.demo.paint.linewave.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -9,6 +9,9 @@ import android.graphics.Shader;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
+
+import com.cyz.demo.paint.linewave.R;
+import com.cyz.demo.paint.linewave.presenter.DataUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +31,8 @@ public class LineWaveView extends LineSurfaceView  {
     // 波浪线上点的集合
     private List<LinePoint> mLinePoints = new ArrayList<>();
     // 波浪线的颜色
-    private int[] lineColors;
-    private float[] colorPositions;
+    private int[] lineColors = DataUtils.lineColors;
+    private float[] colorPositions = DataUtils.colorPositions;
 
     // 波浪线自定义的参数
     private int mBgColor;       // 画布的背景色
@@ -38,7 +41,6 @@ public class LineWaveView extends LineSurfaceView  {
     private float mLineSpeed;   // 波浪线横向移动的速度
     private float mLineShake;   // 波浪线初始化振幅
     private int mPointSize;     // 波浪线上模拟的点数
-    private int mSensitivity;   // 震动敏感度
 
 
     public LineWaveView(Context context, AttributeSet attrs) {
@@ -61,9 +63,24 @@ public class LineWaveView extends LineSurfaceView  {
             mLineSpeed = typedArray.getFloat(R.styleable.LineWaveView_lineSpeed, 7f);
             mLineShake = typedArray.getFloat(R.styleable.LineWaveView_lineShake, 3f);
             mPointSize = typedArray.getInt(R.styleable.LineWaveView_pointSize, 200);
-            mSensitivity = typedArray.getInt(R.styleable.LineWaveView_sensitivity, 5);
             typedArray.recycle();
         }
+
+        initPaint();
+    }
+
+    private void initPaint() {
+        mLinePaint = new Paint();
+        // 线的宽度
+        mLinePaint.setStrokeWidth(mLineWidth);
+        // 空心
+        mLinePaint.setStyle(Paint.Style.STROKE);
+        // 抗锯齿
+        mLinePaint.setAntiAlias(true);
+        // 防抖动
+        mLinePaint.setDither(true);
+        //设置笔刷样式为原型
+        mLinePaint.setStrokeCap(Paint.Cap.ROUND);
     }
 
     @Override
@@ -84,15 +101,8 @@ public class LineWaveView extends LineSurfaceView  {
         heightCenter = height / 2;
 
         mLinePoints.clear();
-        // 波浪线的颜色
-        lineColors = DataUtils.lineColors;
-        colorPositions = DataUtils.colorPositions;
 
-        mLinePaint = new Paint();
-        mLinePaint.setStrokeWidth(mLineWidth);
-        mLinePaint.setStyle(Paint.Style.STROKE);
-        mLinePaint.setAntiAlias(true);
-        // 设置波浪线为渐变色
+        // 设置波浪线为渐变色（加在构造函数中无效）
         LinearGradient linearGradient = new LinearGradient(0, heightCenter, width, heightCenter, lineColors, colorPositions, Shader.TileMode.CLAMP);
         mLinePaint.setShader(linearGradient);
 
@@ -114,25 +124,23 @@ public class LineWaveView extends LineSurfaceView  {
      */
     private void initPositions(float offset, float dx, float lineShake, List<LinePoint> points) {
         for (int i = 0; i < mPointSize; i++) {
-            // 每个点的x坐标
+            // 每个点的坐标
             float x = dx * i;
-            // 计算振幅参数：收敛函数，范围0~1 ：-（（2x-y）/y）^2 + 1 （这个公式会造成波浪轨迹断裂）
-            float shakeParam =  (float)-Math.pow(((2 * i - mPointSize) / mPointSize), 2) + 1f;
-            // 获得Y轴坐标
+            // 计算振幅参数：收敛函数，范围0~1 ：-（（x-y/2）^2 + (y/2)^2）
+            float shakeParam = (float) (-Math.pow(i - mPointSize / 2, 2) + Math.pow(mPointSize / 2, 2)) / 5000;
             float y = getLineY(x, offset, shakeParam, lineShake);
-            // 存储计算出的每个点
             points.add(new LinePoint(x, y));
         }
     }
 
     /**
      * 初始化路径
+     * @param canvas：获得当前的画布
      */
     private void drawLine(Canvas canvas) {
         canvas.drawColor(mBgColor);
-        int colorIndexMax = lineColors.length - 1;
 
-        // 从上一个点移动到下一个点
+        // 连接波浪线所有点
         for (int i = 1; i < mPointSize; i++) {
             LinePoint lastPoint = mLinePoints.get(i - 1);
             LinePoint nextPoint = mLinePoints.get(i);
@@ -154,10 +162,9 @@ public class LineWaveView extends LineSurfaceView  {
     private float getLineY(float x, float offset, float shakeParam, float shakeRatio) {
         // 增加音量对振幅的影响
         float dy = (float) Math.sin(Math.toRadians(x) + offset) * shakeParam * shakeRatio * (float) Math.pow(getVoiceVolume(), 2);
-        // 防止高度溢出
 
         // 波浪线上的点在控件高度中间的位置波动
-        return (float)height / 2 - dy;
+        return (float)heightCenter - dy;
     }
 
     public void setVoiceVolume(int volume) {
@@ -166,7 +173,7 @@ public class LineWaveView extends LineSurfaceView  {
 
     private float getVoiceVolume() {
         // 敏感度越高，声音起振点越低
-        return (mVoiceVolume + mSensitivity) / 10 + 1;
+        return mVoiceVolume / 10 + 1;
     }
 
     /**

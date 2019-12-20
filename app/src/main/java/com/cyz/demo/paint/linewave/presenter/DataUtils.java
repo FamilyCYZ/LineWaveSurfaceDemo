@@ -1,6 +1,4 @@
-package com.cyz.demo.paint.linewave;
-
-import android.content.Context;
+package com.cyz.demo.paint.linewave.presenter;
 
 public class DataUtils {
 

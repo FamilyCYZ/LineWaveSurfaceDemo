@@ -1,4 +1,4 @@
-package com.cyz.demo.paint.linewave;
+package com.cyz.demo.paint.linewave.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,7 +13,7 @@ public class LineSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     Canvas canvas;
     // 标志位
     private boolean isDrawing = false;
-    private final static int TIME_IN_FRAME = 30;
+    private final static int TIME_IN_FRAME = 15;
 
     public LineSurfaceView(Context context) {
         super(context);
