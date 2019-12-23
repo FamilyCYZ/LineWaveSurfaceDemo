@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.cyz.demo.paint.linewave.views.LineWaveView
+    <com.cyz.demo.paint.linewave.views.WaveLineView
+        android:id="@+id/waveLineView"
         android:layout_centerInParent="true"
         android:layout_width="300dp"
         android:layout_height="300dp"

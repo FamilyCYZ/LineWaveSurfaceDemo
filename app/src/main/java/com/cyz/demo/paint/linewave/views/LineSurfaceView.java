@@ -9,10 +9,11 @@ import android.view.SurfaceView;
 public class LineSurfaceView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
 
 
-    private  SurfaceHolder mSurfaceHolder;
-    Canvas canvas;
+    private SurfaceHolder mSurfaceHolder;
+
     // 标志位
     private boolean isDrawing = false;
+    // 绘制间隔时间
     private final static int TIME_IN_FRAME = 15;
 
     public LineSurfaceView(Context context) {
@@ -54,6 +55,7 @@ public class LineSurfaceView extends SurfaceView implements SurfaceHolder.Callba
 
     @Override
     public void run() {
+
         long startTime = System.currentTimeMillis();
         while (isDrawing && mSurfaceHolder != null) {
 
@@ -62,23 +64,23 @@ public class LineSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             synchronized (mSurfaceHolder) {
                 // 获得当前的Canvas进行绘制（保留旧数据）
                 Canvas canvas  = mSurfaceHolder.lockCanvas();
-                drawContent(canvas, passedTime);
+                // 在画布上绘制
+                drawLines(canvas, passedTime);
                 // 提交画布的内容
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
             }
 
             long diffTime = passedTime;
-            // 确保每次更新时间为30ms
+            // 确保每次更新间隔一致
             while(diffTime <= TIME_IN_FRAME) {
                 diffTime = System.currentTimeMillis() - startTime;
                 // 线程等待
                 Thread.yield();
             }
-
         }
     }
 
-    public void drawContent(Canvas canvas, long passedTime) {
+    public void drawLines(Canvas canvas, long passedTime) {
 
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="LineWaveView">
+    <declare-styleable name="WaveLineView">
         <!--  组件的背景颜色 -->
         <attr name="bgColor" format="color" />
         <!-- 波浪线的宽度 -->
